@@ -1,10 +1,9 @@
-from queue import PriorityQueue
 from beachline import BeachLine
+from decimal import Decimal as D
+from event import Event, SiteEvent, CircleEvent
 from geometry.point import Point
 from geometry.edge import Edge
-from event import Event, SiteEvent, CircleEvent
-from main import draw_beachline
-
+from queue import PriorityQueue
 
 class Voronoi:
     def __init__(self, sites: list[Point]) -> None:
@@ -12,6 +11,8 @@ class Voronoi:
         self.beachline: BeachLine = BeachLine()
         self._edges: set[Edge] = set()
         self.events: PriorityQueue[Event] = PriorityQueue()
+        self.events_out: PriorityQueue[Event] = PriorityQueue()
+        self.next_event: Event = None
 
     @property
     def edges(self) -> set[Edge]:
@@ -21,7 +22,7 @@ class Voronoi:
     def edges(self, value: set[Edge]) -> None:
         self._edges = value
 
-    def voronoi(self) -> set[Edge]:
+    def voronoi(self, y: D = None) -> set[Edge]:
         for site in self.sites:
             self.events.put(SiteEvent(site.y, site.x))
 
@@ -30,7 +31,10 @@ class Voronoi:
             ev: list[CircleEvent] = []
 
             event = self.events.get()
-            print(event) # REMOVE
+            self.events_out.put(event)
+
+            if y is not None and event.point.y < y:
+                break
 
             if isinstance(event, SiteEvent):
                 ev = self.beachline.site(event)
@@ -43,6 +47,13 @@ class Voronoi:
             for e in ev:
                 self.events.put(e)
 
-        self.edges |= self.beachline.cleanup()
+        if y is None:
+            self.edges |= self.beachline.cleanup()
+
+        if y is None or self.events_out.empty() or y < min(self.events_out.queue, key=lambda x: x.point.y).point.y:
+            self.next_event = None
+        else:
+            sites = [ev for ev in self.events_out.queue if ev.point.y < y]
+            self.next_event = max(sites, key=lambda x: x.point.y)
 
         return self.edges

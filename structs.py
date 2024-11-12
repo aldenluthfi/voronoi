@@ -1,3 +1,4 @@
+from decimal import Decimal as D
 from geometry.arc import Arc
 
 class DoublyLinkedList:
@@ -74,20 +75,28 @@ class AVLTree:
         self.root = None
 
     def __str__(self) -> str:
-        return self.print_tree(self.root)
+        return self.print_inorder(self.root)
 
     def __repr__(self) -> str:
         return str(self)
 
-    def print_tree(self, node: Arc | None, level: int = 0, prefix: str = "N: ") -> str:
-        if not node:
-            return ""
-
+    def print_inorder(self, node: Arc | None, prefix: str = "") -> str:
         result = ""
-        result += self.print_tree(node.left, level + 1, "N: ")
-        result += prefix + str(node) + "\n"
-        result += self.print_tree(node.right, level + 1, "N: ")
 
+        if node is not None:
+            result += self.print_inorder(node.left, prefix)
+            result += f"{prefix}{str(node)}\n"
+            result += self.print_inorder(node.right, prefix)
+
+        return result
+
+    def print_tree(self, node: Arc | None, level: int = 0, prefix: str = "") -> str:
+        result = ""
+
+        if node is not None:
+            result += self.print_tree(node.right, level + 1, prefix)
+            result += "    " * level + f"{prefix}{str(node)}\n"
+            result += self.print_tree(node.left, level + 1, prefix)
 
         return result
 
@@ -101,6 +110,9 @@ class AVLTree:
         return self.height(node.left) - self.height(node.right)
 
     def update_height(self, node: Arc) -> None:
+        if node is None:
+            return
+
         left: Arc | None = node.left
         right: Arc | None = node.right
 
@@ -140,6 +152,22 @@ class AVLTree:
 
         return y
 
+    def rebalance(self, node: Arc) -> Arc:
+        self.update_height(node)
+        balance = self.balance(node)
+
+        if balance > 1:
+            if self.balance(node.left) < 0:
+                node.left = self.rotate_left(node.left)
+            node = self.rotate_right(node)
+
+        elif balance < -1:
+            if self.balance(node.right) > 0:
+                node.right = self.rotate_right(node.right)
+            node = self.rotate_left(node)
+
+        return node
+
     def min(self, node: Arc) -> Arc:
         current = node
         while current.left:
@@ -151,38 +179,37 @@ class AVLTree:
         if node is None:
             return arc
 
+        node.update(arc.focus.y)
+
+        if node.left:
+            node.left.update(arc.focus.y)
+        if node.right:
+            node.right.update(arc.focus.y)
+
         if arc < node:
             node.left = self.insert_arc(arc, node.left)
         else:
             node.right = self.insert_arc(arc, node.right)
 
-        self.update_height(node)
-        balance = self.balance(node)
-
-        if balance > 1 and arc < node.left:
-            return self.rotate_right(node)
-
-        if balance < -1 and arc > node.right:
-            return self.rotate_left(node)
-
-        if balance > 1 and arc > node.left:
-            node.left = self.rotate_left(node.left)
-            return self.rotate_right(node)
-
-        if balance < -1 and arc < node.right:
-            node.right = self.rotate_right(node.right)
-            return self.rotate_left(node)
+        node = self.rebalance(node)
 
         return node
 
-    def delete_arc(self, arc: Arc, node: Arc | None) -> Arc | None:
+    def delete_arc(self, arc: Arc, node: Arc | None, y: D) -> Arc | None:
         if node is None:
             return None
 
+        node.update(y)
+
+        if node.left:
+            node.left.update(y)
+        if node.right:
+            node.right.update(y)
+
         if arc < node:
-            node.left = self.delete_arc(arc, node.left)
+            node.left = self.delete_arc(arc, node.left, y)
         elif arc > node:
-            node.right = self.delete_arc(arc, node.right)
+            node.right = self.delete_arc(arc, node.right, y)
         else:
             if node.left is None:
                 return node.right
@@ -190,28 +217,15 @@ class AVLTree:
                 return node.left
 
             temp: Arc = self.min(node.right)
-            node.right = self.delete_arc(temp, node.right)
+            node.right = self.delete_arc(temp, node.right, y)
+
             temp.left = node.left
             temp.right = node.right
+            temp.height = node.height
             node = temp
 
 
-        self.update_height(node)
-        balance = self.balance(node)
-
-        if balance > 1 and self.balance(node.left) >= 0:
-            return self.rotate_right(node)
-
-        if balance < -1 and self.balance(node.right) <= 0:
-            return self.rotate_left(node)
-
-        if balance > 1 and self.balance(node.left) < 0:
-            node.left = self.rotate_left(node.left)
-            return self.rotate_right(node)
-
-        if balance < -1 and self.balance(node.right) > 0:
-            node.right = self.rotate_right(node.right)
-            return self.rotate_left(node)
+        node = self.rebalance(node)
 
         return node
 
@@ -220,6 +234,11 @@ class AVLTree:
             return None
 
         node.update(arc.focus.y)
+
+        if node.left:
+            node.left.update(arc.focus.y)
+        if node.right:
+            node.right.update(arc.focus.y)
 
         if arc < node:
             return self.search_arc(arc, node.left)
@@ -231,8 +250,8 @@ class AVLTree:
     def insert(self, arc: Arc) -> None:
         self.root = self.insert_arc(arc, self.root)
 
-    def delete(self, arc: Arc) -> None:
-        self.root = self.delete_arc(arc, self.root)
+    def delete(self, arc: Arc, y: D) -> None:
+        self.root = self.delete_arc(arc, self.root, y)
 
     def search(self, arc: Arc) -> Arc | None:
         return self.search_arc(arc, self.root)

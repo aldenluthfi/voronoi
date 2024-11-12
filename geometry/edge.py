@@ -28,7 +28,7 @@ class Edge:
 
     @property
     def border_edge(self) -> bool:
-        return self.a.x == self.b.x == -inf or self.a.x == self.b.x == inf
+        return self.a.y == inf or self.b.y == inf
 
     @property
     def point_edge(self) -> bool:
@@ -70,14 +70,17 @@ class Edge:
 
     def bound(self) -> Edge:
         for point in [self.a, self.b]:
-            if point.x == D("inf"):
+            if point.x == point.y == inf or point.x == point.y == -inf:
+                continue
+
+            if point.x == inf:
                 point.x = WIDTH
-            elif point.x == D("-inf"):
+            elif point.x == -inf:
                 point.x = -WIDTH
 
-            if point.y == D("inf"):
+            if point.y == inf:
                 point.y = HEIGHT
-            elif point.y == D("-inf"):
+            elif point.y == -inf:
                 point.y = -HEIGHT
 
         return self

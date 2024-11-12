@@ -29,11 +29,8 @@ class Arc:
 
     def __lt__(self, other: Arc | None) -> bool:
         assert other is not None
-
-        if other.e1 == other.e2:
-            return self.e2.b.x < other.e1.b.x
-
-        return self != other and self.e2.b.x <= other.e1.b.x
+        cond: bool = self.e2.b.x == other.e1.b.x and self.e1 != other.e2
+        return self != other and (self.e2.b.x < other.e1.b.x or cond)
 
     def __gt__(self, other: Arc | None) -> bool:
         assert other is not None
@@ -41,10 +38,11 @@ class Arc:
         if self.e1 == self.e2:
             return self.e1.b.x > other.e2.b.x
 
-        return self != other and self.e1.b.x >= other.e2.b.x
+        cond: bool = self.e1.b.x == other.e2.b.x and self.e2 != other.e1
+        return self != other and (self.e1.b.x > other.e2.b.x or cond)
 
     def __str__(self) -> str:
-        return f"Arc({self.focus}, {self.e1}, {self.e2})"
+        return f"Arc({self.focus}, {self.e1.b.x:.2f}, {self.e2.b.x:.2f})"
 
     def __repr__(self) -> str:
         return str(self)
@@ -72,6 +70,9 @@ class Arc:
 
         a, b = u.focus
         p, q = v.focus
+
+        if b < d <= q or q < d <= b:
+            return None
 
         if b == q:
             x = (a + p) / 2

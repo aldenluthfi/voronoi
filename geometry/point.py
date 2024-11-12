@@ -94,7 +94,7 @@ class Point:
         f = (x3 - x1) * (x1 + x3) + (y3 - y1) * (y1 + y3)
         g = 2 * ((x2 - x1) * (y3 - y2) - (x3 - x2) * (y2 - y1))
 
-        if abs(g) < EPSILON:
+        if g == 0:
             return None, D("inf")
 
         x = (d * e - b * f) / g
@@ -103,7 +103,7 @@ class Point:
         o: Point = Point(x, y)
         r: D = Point.distance(o, i)
 
-        if r > WIDTH:
+        if r > 1 / EPSILON:
             return None, D("inf")
 
         return o, r

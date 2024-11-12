@@ -34,4 +34,4 @@ class CircleEvent(Event):
         self.valid: bool = True
 
     def __str__(self) -> str:
-        return f"CircleEvent{self.point}"
+        return f"CircleEvent{self.center}"
