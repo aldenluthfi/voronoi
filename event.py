@@ -27,11 +27,12 @@ class SiteEvent(Event):
         return f"SiteEvent{self.point}"
 
 class CircleEvent(Event):
-    def __init__(self, y: D, center: Point, arc: Arc) -> None:
+    def __init__(self, y: D, center: Point, arc: Arc, r: D) -> None:
         super().__init__(Point(center.x, y))
         self.center: Point = center
         self.arc: Arc = arc
         self.valid: bool = True
+        self.r = r
 
     def __str__(self) -> str:
         return f"CircleEvent{self.center}"

@@ -1,6 +1,7 @@
+import time
 from constants import *
 from decimal import Decimal as D
-from event import Event
+from event import CircleEvent, Event, SiteEvent
 from geometry.point import Point
 from geometry.edge import Edge
 from geometry.arc import Arc
@@ -41,11 +42,19 @@ def draw_diagram(voronoi: Voronoi) -> None:
 
     pygame.display.flip()
 
-def draw_beachline(voronoi: Voronoi, d: D) -> None:
+def draw_beachline(sweep_line: pygame.Rect, voronoi: Voronoi, d: D) -> None:
     arc: Arc | None = voronoi.beachline.list.head
 
     surface: pygame.Surface = pygame.display.get_surface()
     surface.fill('white')
+
+    pygame.draw.rect(
+        surface=surface,
+        color='red',
+        rect=sweep_line
+    )
+
+    ev: Event | None = voronoi.next_event
 
     for edge in voronoi.edges:
         u, v = Edge.uncenter(edge.to_tuple())
@@ -57,12 +66,20 @@ def draw_beachline(voronoi: Voronoi, d: D) -> None:
         )
 
     for site in voronoi.sites:
-        pygame.draw.circle(
-            surface=surface,
-            color='red' if site.y == d else 'black',
-            center=Point.uncenter(site.to_tuple()),
-            radius=5
-        )
+        if ev and site == ev.point:
+            pygame.draw.circle(
+                surface=surface,
+                color='red',
+                center=Point.uncenter(site.to_tuple()),
+                radius=5
+            )
+        else:
+            pygame.draw.circle(
+                surface=surface,
+                color='black',
+                center=Point.uncenter(site.to_tuple()),
+                radius=5
+            )
 
     while arc:
         arc.update(d)
@@ -112,6 +129,26 @@ def draw_beachline(voronoi: Voronoi, d: D) -> None:
 
         arc = arc.next
 
+    if ev is not None:
+        if isinstance(ev, CircleEvent) and ev.arc.on_beachline:
+            c = voronoi.next_event.center.to_tuple()
+            r = voronoi.next_event.r
+
+            pygame.draw.circle(
+                surface=surface,
+                color='purple',
+                center=Point.uncenter(c),
+                radius=5
+            )
+
+            pygame.draw.circle(
+                surface=surface,
+                color='black',
+                center=Point.uncenter(c),
+                radius=float(r),
+                width=1
+            )
+
     pygame.display.flip()
 
 def main() -> None:
@@ -159,12 +196,12 @@ def main() -> None:
                 ev = voronoi.next_event
 
             if voronoi is not None:
-                draw_beachline(voronoi, D(y))
+                draw_beachline(sweep_line, voronoi, D(y))
 
         for dot in dots:
             if dot.x > WIDTH or dot.x < 0 or dot.y > HEIGHT or dot.y < 0:
                 dots.remove(dot)
-            else:
+            elif voronoi is None:
                 pygame.draw.rect(
                     surface=surface,
                     color='black',
@@ -260,7 +297,7 @@ def main() -> None:
                             color='red',
                             start_pos=(0, 0),
                             end_pos=(WIDTH, 0),
-                            width=2
+                            width=1
                         )
 
                     voronoi = None
@@ -269,12 +306,12 @@ def main() -> None:
                     line_speed = min(line_speed * 2, MAX_SPEED)
 
                 case (pygame.KEYDOWN, _, pygame.K_r):
-                    if sweep_line is not None:
-                        sweep_line = None
-                        line_y = 0
-
-                    dots.clear()
+                    dots = []
+                    sites = set()
+                    line_y = 0
                     voronoi = None
+                    active_dot = None
+                    sweep_line = None
 
                 case (pygame.QUIT, _, _) | (pygame.KEYDOWN, _, pygame.K_q):
                     running = False

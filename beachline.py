@@ -159,7 +159,7 @@ class BeachLine:
         o, r = Point.empty_circle(arc.prev.focus, arc.focus, arc.next.focus)
 
         if o is not None and o.y - r <= point.y:
-            return CircleEvent(o.y - r, o, arc)
+            return CircleEvent(o.y - r, o, arc, r)
 
 
 
