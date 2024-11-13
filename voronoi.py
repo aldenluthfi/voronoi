@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from beachline import BeachLine
 from decimal import Decimal as D
 from event import Event, SiteEvent, CircleEvent

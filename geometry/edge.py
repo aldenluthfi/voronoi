@@ -1,3 +1,4 @@
+from __future__ import annotations
 from math import inf
 from constants import HEIGHT, WIDTH
 from geometry.point import Point

@@ -1,3 +1,4 @@
+from __future__ import annotations
 from decimal import Decimal as D
 from geometry.edge import Edge
 from geometry.point import Point
