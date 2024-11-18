@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import time
 from constants import *
 from decimal import Decimal as D
@@ -8,7 +10,6 @@ from geometry.arc import Arc
 from math import ceil, floor
 import pygame
 from voronoi import Voronoi
-
 
 def getattr(obj: object, name: str) -> object:
     try:
@@ -151,9 +152,56 @@ def draw_beachline(sweep_line: pygame.Rect, voronoi: Voronoi, d: D) -> None:
 
     pygame.display.flip()
 
-def main() -> None:
 
+def render_text_box(font, instructions):
+    text_surfaces = []
+    for line in instructions:
+        text_surface = font.render(line, True, (0, 0, 0))  # Black text
+        text_surfaces.append(text_surface)
+    return text_surfaces
+
+def draw_tutorial_box(surface, text_surfaces):
+    padding = 10
+    font_height = text_surfaces[0].get_height()
+
+    # Calculate the maximum width of the text lines
+    max_width = max(text_surface.get_width() for text_surface in text_surfaces)
+    box_width = max_width + padding * 2
+    box_height = len(text_surfaces) * (font_height + 5) + padding * 2
+
+    # Compute x and y to center the box
+    surface_width, surface_height = surface.get_size()
+    x = (surface_width - box_width) // 2
+    y = (surface_height - box_height) // 2
+
+    # Draw the background rectangle
+    box_rect = pygame.Rect(x, y, box_width, box_height)
+    pygame.draw.rect(surface, (220, 220, 220), box_rect)  # Light gray background
+    pygame.draw.rect(surface, (0, 0, 0), box_rect, 1)  # Black border
+
+    # Blit each line of text, centered within the box
+    text_y = y + padding
+    for text_surface in text_surfaces:
+        text_width = text_surface.get_width()
+        # Center the text within the box
+        text_x = x + (box_width - text_width) // 2
+        surface.blit(text_surface, (text_x, text_y))
+        text_y += font_height + 5  # Line spacing
+
+    return box_rect  # Return the rectangle for positioning the 'X' button
+
+def draw_button(surface, rect, text, font, bg_color, text_color):
+    pygame.draw.rect(surface, bg_color, rect)
+    pygame.draw.rect(surface, (0, 0, 0), rect, 1)  # Black border
+    text_surface = font.render(text, True, text_color)
+    text_rect = text_surface.get_rect(center=rect.center)
+    surface.blit(text_surface, text_rect)
+
+
+def main() -> None:
+    show_tutorial = True
     pygame.init()
+    pygame.font.init()  # Initialize the font module
     pygame.display.set_mode(size=(WIDTH, HEIGHT), vsync=1)
     pygame.display.set_caption("Voronoi Diagram")
 
@@ -174,6 +222,30 @@ def main() -> None:
     running: bool = True
 
     voronoi: Voronoi = None
+
+    font_size = 20  # You can adjust the size
+    font = pygame.font.SysFont('Arial', font_size)
+    instructions = [
+        "Controls:",
+        "Left Click: Add/Select Site",
+        "Right Click: Remove Site",
+        "Drag Mouse: Move Site",
+        "'k': Start/Pause Sweep Line",
+        "'j': Decrease Sweep Line Speed",
+        "'l': Increase Sweep Line Speed",
+        "'r': Reset",
+        "'q': Quit",
+        "TUTORIAL WILL NOT SHOW AGAIN IF CLOSED"
+    ]
+
+    text_surfaces = render_text_box(font, instructions)
+
+    # 'X' button in the tutorial box
+    close_button_size = 30
+    close_button_rect = None  # Will be defined later
+
+    # Other variables for the tutorial box
+    tutorial_box_rect = None  # Will be defined later
 
     while running:
 
@@ -239,6 +311,18 @@ def main() -> None:
 
             match (type, button, key):
                 case (pygame.MOUSEBUTTONDOWN, 1, _):
+                    # Left mouse button down
+                    mouse_pos = event.pos
+                    if show_tutorial:
+                        if close_button_rect and close_button_rect.collidepoint(mouse_pos):
+                            show_tutorial = False
+                            tutorial_box_rect = None
+                            close_button_rect = None
+                            break
+                        elif tutorial_box_rect and tutorial_box_rect.collidepoint(mouse_pos):
+                            # Ignore clicks within the tutorial box
+                            break
+
                     if sweep_line is not None:
                         sweep_line = None
                         line_y = 0
@@ -321,6 +405,24 @@ def main() -> None:
 
         if sweep_line is None and voronoi is None:
             surface.fill('white')
+                # Draw the tutorial box and 'X' button if it's shown
+        if show_tutorial:
+            # Draw the tutorial box and get its rectangle
+            tutorial_box_rect = draw_tutorial_box(surface, text_surfaces)
+
+            # Update the 'X' button position relative to the tutorial box
+            close_button_rect = pygame.Rect(
+                tutorial_box_rect.right - close_button_size - 10,
+                tutorial_box_rect.top + 10,
+                close_button_size,
+                close_button_size
+            )
+
+            # Draw the 'X' button
+            draw_button(surface, close_button_rect, 'X', font, (200, 50, 50), (255, 255, 255))
+        else:
+            tutorial_box_rect = None
+            close_button_rect = None
 
         pygame.display.update()
 

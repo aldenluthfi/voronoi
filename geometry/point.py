@@ -1,3 +1,4 @@
+from __future__ import annotations
 from constants import EPSILON, WIDTH, HEIGHT
 from decimal import Decimal as D
 from typing import Iterator

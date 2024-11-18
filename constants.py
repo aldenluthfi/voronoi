@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 WIDTH: int = 1024
 HEIGHT: int = 1024
 DOTS_RADIUS: int = 5

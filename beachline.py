@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from constants import HEIGHT
 from decimal import Decimal as D
 from structs import AVLTree, DoublyLinkedList

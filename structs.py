@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from decimal import Decimal as D
 from geometry.arc import Arc
 
