@@ -11,14 +11,17 @@ from math import ceil, floor
 import pygame
 from voronoi import Voronoi
 
+
 def getattr(obj: object, name: str) -> object:
     try:
         return obj.__getattribute__(name)
     except AttributeError:
         return None
 
+
 def process_site(dot: pygame.Rect) -> Point:
     return Point(*Point.center(dot.center))
+
 
 def draw_diagram(voronoi: Voronoi) -> None:
     surface: pygame.Surface = pygame.display.get_surface()
@@ -42,6 +45,7 @@ def draw_diagram(voronoi: Voronoi) -> None:
         )
 
     pygame.display.flip()
+
 
 def draw_beachline(sweep_line: pygame.Rect, voronoi: Voronoi, d: D) -> None:
     arc: Arc | None = voronoi.beachline.list.head
@@ -160,6 +164,7 @@ def render_text_box(font, instructions):
         text_surfaces.append(text_surface)
     return text_surfaces
 
+
 def draw_tutorial_box(surface, text_surfaces):
     padding = 10
     font_height = text_surfaces[0].get_height()
@@ -176,7 +181,8 @@ def draw_tutorial_box(surface, text_surfaces):
 
     # Draw the background rectangle
     box_rect = pygame.Rect(x, y, box_width, box_height)
-    pygame.draw.rect(surface, (220, 220, 220), box_rect)  # Light gray background
+    # Light gray background
+    pygame.draw.rect(surface, (220, 220, 220), box_rect)
     pygame.draw.rect(surface, (0, 0, 0), box_rect, 1)  # Black border
 
     # Blit each line of text, centered within the box
@@ -189,6 +195,7 @@ def draw_tutorial_box(surface, text_surfaces):
         text_y += font_height + 5  # Line spacing
 
     return box_rect  # Return the rectangle for positioning the 'X' button
+
 
 def draw_button(surface, rect, text, font, bg_color, text_color):
     pygame.draw.rect(surface, bg_color, rect)
@@ -209,6 +216,21 @@ def main() -> None:
     surface.fill('white')
 
     dots: list[pygame.Rect] = []
+
+    try:
+        with open("points.txt", "r") as inputs:
+            inputted_points = inputs.readlines()
+        for points in inputted_points:
+            point_pair = [int(_) for _ in points.strip()[1:-1].split(",")]
+            dot = pygame.draw.circle(
+                surface=surface,
+                color='black',
+                center=point_pair,
+                radius=DOTS_RADIUS
+            )
+            dots.append(dot)
+    except FileNotFoundError as e:
+        print("No input file detected.", e)
 
     sweep_line: pygame.Rect | None = None
     active_dot: pygame.Rect | None = None
@@ -235,6 +257,11 @@ def main() -> None:
         "'l': Increase Sweep Line Speed",
         "'r': Reset",
         "'q': Quit",
+        "",
+        "By default, program will look for points.txt for file inputs",
+        "In file, define points as tuples, line-separated, without space",
+        "Coordinates are from (0,0) to (1024,1024)",
+        "",
         "TUTORIAL WILL NOT SHOW AGAIN IF CLOSED"
     ]
 
@@ -255,7 +282,6 @@ def main() -> None:
         if sweep_line is not None:
 
             _, y = Point.center(sweep_line.center)
-
 
             if voronoi is None:
                 voronoi = Voronoi(sites)
@@ -313,12 +339,13 @@ def main() -> None:
                 case (pygame.MOUSEBUTTONDOWN, 1, _):
                     # Left mouse button down
                     mouse_pos = event.pos
+                    close_event = False
                     if show_tutorial:
                         if close_button_rect and close_button_rect.collidepoint(mouse_pos):
                             show_tutorial = False
                             tutorial_box_rect = None
                             close_button_rect = None
-                            break
+                            close_event = True
                         elif tutorial_box_rect and tutorial_box_rect.collidepoint(mouse_pos):
                             # Ignore clicks within the tutorial box
                             break
@@ -332,12 +359,13 @@ def main() -> None:
                             active_dot = dot
                             break
                     else:
-                        dot = pygame.draw.circle(
-                            surface=surface,
-                            color='black',
-                            center=event.pos,
-                            radius=DOTS_RADIUS
-                        )
+                        if not close_event:
+                            dot = pygame.draw.circle(
+                                surface=surface,
+                                color='black',
+                                center=event.pos,
+                                radius=DOTS_RADIUS
+                            )
 
                         dots.append(dot)
 
@@ -405,7 +433,7 @@ def main() -> None:
 
         if sweep_line is None and voronoi is None:
             surface.fill('white')
-                # Draw the tutorial box and 'X' button if it's shown
+            # Draw the tutorial box and 'X' button if it's shown
         if show_tutorial:
             # Draw the tutorial box and get its rectangle
             tutorial_box_rect = draw_tutorial_box(surface, text_surfaces)
@@ -419,7 +447,8 @@ def main() -> None:
             )
 
             # Draw the 'X' button
-            draw_button(surface, close_button_rect, 'X', font, (200, 50, 50), (255, 255, 255))
+            draw_button(surface, close_button_rect, 'X',
+                        font, (200, 50, 50), (255, 255, 255))
         else:
             tutorial_box_rect = None
             close_button_rect = None
