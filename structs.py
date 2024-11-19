@@ -92,13 +92,13 @@ class AVLTree:
 
         return result
 
-    def print_tree(self, node: Arc | None, level: int = 0, prefix: str = "") -> str:
+    def print_tree(self, node: Arc | None, lvl: int = 0, pref: str = "") -> str:
         result = ""
 
         if node is not None:
-            result += self.print_tree(node.right, level + 1, prefix)
-            result += "    " * level + f"{prefix}{str(node)}\n"
-            result += self.print_tree(node.left, level + 1, prefix)
+            result += self.print_tree(node.right, lvl + 1, pref)
+            result += "    " * lvl + f"{pref}{str(node)}\n"
+            result += self.print_tree(node.left, lvl + 1, pref)
 
         return result
 

@@ -1,7 +1,10 @@
+import re
+import stat
 from __future__ import annotations
 
 from beachline import BeachLine
 from decimal import Decimal as D
+from constants import HEIGHT, WIDTH
 from event import Event, SiteEvent, CircleEvent
 from geometry.point import Point
 from geometry.edge import Edge
@@ -14,7 +17,8 @@ class Voronoi:
         self._edges: set[Edge] = set()
         self.events: PriorityQueue[Event] = PriorityQueue()
         self.events_out: PriorityQueue[Event] = PriorityQueue()
-        self.next_event: Event = None
+        self.next_event: Event | None = None
+        self.next_visible: Event | None = None
 
     @property
     def edges(self) -> set[Edge]:
@@ -23,6 +27,37 @@ class Voronoi:
     @edges.setter
     def edges(self, value: set[Edge]) -> None:
         self._edges = value
+
+    @staticmethod
+    def visible(ev: Event) -> bool:
+        cond = True
+        x, y = 0, 0
+
+        if isinstance(ev, CircleEvent):
+            x, y = ev.center
+            cond &= ev.arc.on_beachline
+
+        if isinstance(ev, SiteEvent):
+            x, y = ev.point
+
+        cond &= -WIDTH // 2 <= x <= WIDTH // 2
+        cond &= -HEIGHT // 2 <= y <= HEIGHT // 2
+
+        return cond
+
+    def validate(self, queue: list[Event], y: D, visible: bool=False) -> Event:
+        for event in queue:
+            if isinstance(event, CircleEvent):
+                cond = event is None or event.point.y < y
+            if isinstance(event, SiteEvent):
+                cond = event is None or event.point.y < y
+
+            if visible:
+                cond &= Voronoi.visible(event)
+
+            if cond:
+                return event
+
 
     def voronoi(self, y: D = None) -> set[Edge]:
         for site in self.sites:
@@ -52,10 +87,8 @@ class Voronoi:
         if y is None:
             self.edges |= self.beachline.cleanup()
 
-        if y is None or self.events_out.empty() or y < min(self.events_out.queue, key=lambda x: x.point.y).point.y:
-            self.next_event = None
-        else:
-            sites = [ev for ev in self.events_out.queue if ev.point.y < y]
-            self.next_event = max(sites, key=lambda x: x.point.y)
+        if y is not None:
+            self.next_event = self.validate(self.events_out.queue, y)
+            self.next_visible = self.validate(self.events_out.queue, y, True)
 
         return self.edges
