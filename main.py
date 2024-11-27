@@ -245,7 +245,6 @@ def main() -> None:
     visible: Event | None = None
 
     line_y: float = 0
-    scale: float = DEFAULT_SCALE
 
     voronoi: Voronoi | None = None
     show_tutorial: bool = True
@@ -412,12 +411,6 @@ def main() -> None:
                 case (pygame.TEXTINPUT, _, 'l'):
                     line_speed = min(line_speed * 2, MAX_SPEED)
 
-                case (pygame.KEYDOWN, _, pygame.K_i):
-                    scale = min(scale * 2, MAX_SCALE)
-
-                case (pygame.KEYDOWN, _, pygame.K_o):
-                    scale = min(scale / 2, MAX_SCALE)
-
                 case (pygame.KEYDOWN, _, pygame.K_r):
                     dots = []
                     sites = set()
@@ -456,9 +449,6 @@ def main() -> None:
         else:
             tutorial_box_rect = None
             close_button_rect = None
-
-        scaled = pygame.transform.scale_by(surface, scale)
-        surface.blit(scaled, (0, 0))
 
         pygame.display.flip()
 
