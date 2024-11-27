@@ -55,6 +55,9 @@ class BeachLine:
 
         a0: Arc | None = self.tree.search(Arc.dummy(event.point))
 
+        if a0 is None:
+            a0 = self.list.search(event.point)
+
         assert a0 is not None
 
         if a0.focus.y == y:

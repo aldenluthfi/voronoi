@@ -1,5 +1,3 @@
-import re
-import stat
 from __future__ import annotations
 
 from beachline import BeachLine
@@ -11,8 +9,8 @@ from geometry.edge import Edge
 from queue import PriorityQueue
 
 class Voronoi:
-    def __init__(self, sites: list[Point]) -> None:
-        self.sites: list[Point] = sites
+    def __init__(self, sites: set[Point]) -> None:
+        self.sites: set[Point] = sites
         self.beachline: BeachLine = BeachLine()
         self._edges: set[Edge] = set()
         self.events: PriorityQueue[Event] = PriorityQueue()
@@ -45,21 +43,23 @@ class Voronoi:
 
         return cond
 
-    def validate(self, queue: list[Event], y: D, visible: bool=False) -> Event:
-        for event in queue:
+    def validate(self, q: list[Event], y: D, vis: bool=False) -> Event | None:
+        for event in q:
+
+            cond: bool = False
+
             if isinstance(event, CircleEvent):
                 cond = event is None or event.point.y < y
             if isinstance(event, SiteEvent):
                 cond = event is None or event.point.y < y
 
-            if visible:
+            if vis:
                 cond &= Voronoi.visible(event)
 
             if cond:
                 return event
 
-
-    def voronoi(self, y: D = None) -> set[Edge]:
+    def voronoi(self, y: D | None=None) -> set[Edge]:
         for site in self.sites:
             self.events.put(SiteEvent(site.y, site.x))
 

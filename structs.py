@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from decimal import Decimal as D
 from geometry.arc import Arc
+from geometry.point import Point
 
 class DoublyLinkedList:
 
@@ -71,6 +72,15 @@ class DoublyLinkedList:
             self.tail = arc.prev
 
         return arc
+
+    def search(self, point: Point) -> Arc | None:
+        current = self.head
+
+        while current.e2.b.x < point.x:
+            current.update(point.y)
+            current = current.next
+
+        return current
 
 class AVLTree:
     def __init__(self):
@@ -232,7 +242,7 @@ class AVLTree:
         return node
 
     def search_arc(self, arc: Arc, node: Arc | None) -> Arc | None:
-        if not node:
+        if node is None:
             return None
 
         node.update(arc.focus.y)

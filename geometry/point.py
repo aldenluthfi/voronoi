@@ -3,8 +3,6 @@ from constants import EPSILON, WIDTH, HEIGHT
 from decimal import Decimal as D
 from typing import Iterator
 
-PointTuple = tuple[D, ...]
-
 class Point:
     def __init__(self, x: D | int | float, y: D | int | float) -> None:
         self._x: D = D(x)
@@ -59,16 +57,16 @@ class Point:
     def y(self, value: int | float | D) -> None:
         self._y = D(value)
 
-    def to_tuple(self) -> PointTuple:
+    def to_tuple(self) -> tuple[D, ...]:
         return self.x, self.y
 
     @staticmethod
-    def center(point: PointTuple) -> tuple[float, float]:
+    def center(point: tuple[D, ...] | tuple[int, ...]) -> tuple[float, float]:
         x, y = point
         return float(x - D(WIDTH / 2)), float(D(HEIGHT / 2) - y)
 
     @staticmethod
-    def uncenter(point: PointTuple) -> tuple[float, float]:
+    def uncenter(point: tuple[D, ...] | tuple[int, ...]) -> tuple[float, float]:
         x, y = point
         return float(x + D(WIDTH / 2)), float(D(HEIGHT / 2) - y)
 
