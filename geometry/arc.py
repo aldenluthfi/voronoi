@@ -30,6 +30,7 @@ class Arc:
 
     def __lt__(self, other: Arc | None) -> bool:
         assert other is not None
+
         cond: bool = self.e2.b.x == other.e1.b.x and self.e1 != other.e2
         return self != other and (self.e2.b.x < other.e1.b.x or cond)
 

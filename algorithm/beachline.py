@@ -2,12 +2,13 @@ from __future__ import annotations
 
 from constants import HEIGHT
 from decimal import Decimal as D
-from structs import AVLTree, DoublyLinkedList
+from algorithm.event import SiteEvent, CircleEvent
 from geometry.edge import Edge
 from geometry.arc import Arc
 from geometry.point import Point
-from event import SiteEvent, CircleEvent
 from math import inf
+from structures.tree import AVLTree
+from structures.list import DoublyLinkedList
 
 class BeachLine:
     def __init__(self) -> None:

@@ -1,5 +1,5 @@
 from __future__ import annotations
-from constants import EPSILON, WIDTH, HEIGHT
+from constants import EPSILON
 from decimal import Decimal as D
 from typing import Iterator
 
@@ -57,23 +57,6 @@ class Point:
     def y(self, value: int | float | D) -> None:
         self._y = D(value)
 
-    def to_tuple(self) -> tuple[D, ...]:
-        return self.x, self.y
-
-    @staticmethod
-    def center(point: tuple[D, ...] | tuple[int, ...]) -> tuple[float, float]:
-        x, y = point
-        return float(x - D(WIDTH / 2)), float(D(HEIGHT / 2) - y)
-
-    @staticmethod
-    def uncenter(point: tuple[D, ...] | tuple[int, ...]) -> tuple[float, float]:
-        x, y = point
-        return float(x + D(WIDTH / 2)), float(D(HEIGHT / 2) - y)
-
-    @staticmethod
-    def distance(a: Point, b: Point) -> D:
-        return abs(a - b)
-
     # O'Rourke 2ed p. 189
     @staticmethod
     def empty_circle(i: Point, j: Point, k: Point) -> tuple[Point | None, D]:
@@ -100,9 +83,9 @@ class Point:
         y = (a * f - c * e) / g
 
         o: Point = Point(x, y)
-        r: D = Point.distance(o, i)
+        r: D = abs(o - i)
 
-        if r > 1 / EPSILON:
+        if r > (1 / EPSILON):
             return None, D("inf")
 
         return o, r

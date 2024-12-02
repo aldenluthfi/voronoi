@@ -4,8 +4,6 @@ from constants import HEIGHT, WIDTH
 from geometry.point import Point
 from decimal import Decimal as D
 
-EdgeTuple = tuple[tuple[D, ...], tuple[D, ...]]
-
 class Edge:
     def __init__(self, a: Point, b: Point, finished: bool = False) -> None:
         self.a = a
@@ -29,7 +27,7 @@ class Edge:
 
     @property
     def border_edge(self) -> bool:
-        return self.a.y == inf or self.b.y == inf
+        return self.a.x == inf or self.a.x == -inf and self.point_edge
 
     @property
     def point_edge(self) -> bool:
@@ -47,9 +45,6 @@ class Edge:
 
     def f(self, x: D | int | float) -> D:
         return self.slope * (D(x) - self.a.x) + self.a.y
-
-    def to_tuple(self) -> EdgeTuple:
-        return tuple(self.a), tuple(self.b)
 
     def extend(self) -> Edge:
         if self.slope == D("nan"):
@@ -85,11 +80,3 @@ class Edge:
                 point.y = -HEIGHT
 
         return self
-
-    @staticmethod
-    def center(edge: EdgeTuple) -> tuple[tuple[float, float], ...]:
-        return Point.center(edge[0]), Point.center(edge[1])
-
-    @staticmethod
-    def uncenter(edge: EdgeTuple) -> tuple[tuple[float, float], ...]:
-        return Point.uncenter(edge[0]), Point.uncenter(edge[1])
