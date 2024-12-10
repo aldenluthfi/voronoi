@@ -13,6 +13,7 @@ class Voronoi:
         self.sites: set[Point] = sites
         self.beachline: BeachLine = BeachLine()
         self._edges: set[Edge] = set()
+        self.delaunay: set[Edge] = set()
         self.events: PriorityQueue[Event] = PriorityQueue()
         self.next_visible: Event | None = None
         self.empty_circle: CircleEvent | None = None
@@ -46,8 +47,9 @@ class Voronoi:
             self.events.put(SiteEvent(site.y, site.x))
 
         while not self.events.empty():
-            edges_set: set[Edge] = set()
-            event_list: list[CircleEvent] = []
+            ed: set[Edge] = set()
+            dl: set[Edge] = set()
+            ev: list[CircleEvent] = []
 
             event: Event = self.events.get()
 
@@ -62,7 +64,7 @@ class Voronoi:
                 break
 
             if isinstance(event, SiteEvent):
-                event_list = self.beachline.site(event)
+                ev, dl = self.beachline.site(event)
 
             if isinstance(event, CircleEvent):
 
@@ -70,11 +72,13 @@ class Voronoi:
                     if not self.empty_circle or event.r > self.empty_circle.r:
                         self.empty_circle = event
 
-                edges_set, event_list = self.beachline.circle(event)
+                ed, ev, dl = self.beachline.circle(event)
 
-                self.edges |= edges_set
+                self.edges |= ed
 
-            for e in event_list:
+            self.delaunay |= dl
+
+            for e in ev:
                 self.events.put(e)
 
         if y is None:

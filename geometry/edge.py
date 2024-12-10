@@ -34,6 +34,13 @@ class Edge:
         return self.a == self.b
 
     @property
+    def visible_edge(self) -> bool:
+        cond1: bool = -WIDTH < self.a.x < WIDTH and -HEIGHT < self.a.y < HEIGHT
+        cond2: bool = -WIDTH < self.b.x < WIDTH and -HEIGHT < self.b.y < HEIGHT
+
+        return cond1 or cond2
+
+    @property
     def slope(self) -> D:
         if self.a == self.b:
             return D("nan")
@@ -47,6 +54,9 @@ class Edge:
         return self.slope * (D(x) - self.a.x) + self.a.y
 
     def extend(self) -> Edge:
+        if not self.visible_edge:
+            return self
+
         if self.slope == D("nan"):
             return self
 

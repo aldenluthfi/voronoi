@@ -19,11 +19,14 @@ class GUI:
 
         self.sites: list[Rect] = []
         self.sweep_line: Rect | None = None
+        self.sweep_line_y: float = 0
         self.selected_site: Rect | None = None
         self.largest_circle: bool = False
+        self.delaunay: bool = False
         self.voronoi: Voronoi | None = None
 
         self.help: bool = True
+        self.tutorial_box: Rect | None = None
         self.paused: bool = True
         self.font: font.Font | None = None
         self.font_bold: font.Font | None = None
@@ -88,6 +91,9 @@ class GUI:
 
             case (pygame.KEYDOWN, pygame.K_k):
                 self.start_pause_line()
+
+            case (pygame.KEYDOWN, pygame.K_n):
+                self.delaunay = not self.delaunay
 
             case (pygame.KEYDOWN, pygame.K_m):
                 self.largest_circle = not self.largest_circle
@@ -170,7 +176,7 @@ class GUI:
         for site in self.sites:
             site.center = (site.center[0] + x, site.center[1])
 
-    def draw_tutorial_box(self, frame: Surface, texts: list[Surface]) -> None:
+    def draw_help(self, frame: Surface, texts: list[Surface]) -> Rect:
 
         padding: int = 20
         font_height: int = texts[0].get_height()
@@ -182,7 +188,7 @@ class GUI:
         box_rect = Rect(0, 0, box_width, box_height)
         box_rect.center = frame.get_rect().center
 
-        draw.rect(frame, GRAY, box_rect, 0, SITE_RADIUS)
+        box: Rect = draw.rect(frame, GRAY, box_rect, 0, SITE_RADIUS)
         draw.rect(frame, BLACK, box_rect, LINE_THICKNESS, SITE_RADIUS)
 
         text_y = box_rect.top + padding
@@ -193,6 +199,8 @@ class GUI:
             frame.blit(text, (text_x, text_y))
 
             text_y += font_height + 5
+
+        return box
 
     def render_texts(self, tutorial: list[tuple[str, int]]) -> list[Surface]:
 
@@ -214,9 +222,13 @@ class GUI:
     def hard_reset(self) -> None:
         self.sites.clear()
         self.sweep_line = None
+        self.sweep_line_y = 0
         self.selected_site = None
         self.voronoi = None
         self.paused = True
+
+        self.largest_circle = False
+        self.delaunay = False
 
         self.speed = DEFAULT_SPEED
         self.scale = DEFAULT_SCALE
@@ -224,13 +236,14 @@ class GUI:
     def soft_reset(self) -> None:
         self.paused = True
         self.sweep_line = None
+        self.sweep_line_y = 0
         self.voronoi = None
 
     def delete_site(self, pos: tuple[int, int]) -> None:
         if self.help:
             return
 
-        self.soft_reset()
+        self.voronoi = None
 
         for site in self.sites:
             if self.collides(site.center, self.unscale_point(*pos)):
@@ -239,9 +252,16 @@ class GUI:
 
     def add_select_site(self, frame: Surface, pos: tuple[float, float]) -> None:
         if self.help:
+
+            assert self.tutorial_box is not None
+
+            if not self.tutorial_box.collidepoint(pos):
+                self.help = False
+                self.tutorial_box = None
+
             return
 
-        self.soft_reset()
+        self.voronoi = None
 
         for site in self.sites:
             if self.collides(site.center, self.unscale_point(*pos)):
@@ -254,19 +274,21 @@ class GUI:
         if self.selected_site is None or self.help:
             return
 
-        self.soft_reset()
+        self.voronoi = None
         self.selected_site.center = self.unscale_point(*pos)
 
     def move_line(self) -> None:
         if self.sweep_line is None:
             return
 
-        self.sweep_line.move_ip(0, self.speed)
+        self.sweep_line_y += (self.speed * self.scale / MIN_SCALE)
+        self.sweep_line.move_ip(0, self.sweep_line_y - self.sweep_line.centery)
 
         cond: bool = bool(self.voronoi) and bool(self.voronoi.next_visible)
 
         if self.sweep_line.top > HEIGHT and not cond:
             self.sweep_line = None
+            self.sweep_line_y = 0
             self.paused = True
 
         self.voronoi = None
@@ -329,7 +351,13 @@ class GUI:
 
         return draw.circle(frame, SITE_COLOR, (x, y), SITE_RADIUS)
 
-    def scale_edge(self, frame: Surface, edge: Edge) -> Rect:
+    def scale_edge(
+            self,
+            frame: Surface,
+            edge: Edge,
+            color: tuple[int, int, int]
+        ) -> Rect:
+
         x1, y1 = self.to_float(edge.a)
         x2, y2 = self.to_float(edge.b)
 
@@ -341,7 +369,7 @@ class GUI:
         x1, y1 = self.uncenter_coords(*self.scale_coords(x1, y1))
         x2, y2 = self.uncenter_coords(*self.scale_coords(x2, y2))
 
-        return draw.line(frame, EDGE_COLOR, (x1, y1), (x2, y2), LINE_THICKNESS)
+        return draw.line(frame, color, (x1, y1), (x2, y2), LINE_THICKNESS)
 
     def scale_event(self, frame: Surface, event: Event) -> None:
         assert isinstance(event, SiteEvent) or isinstance(event, CircleEvent)
@@ -396,21 +424,25 @@ class GUI:
         if WIDTH * MIN_SCALE / self.scale <= MIN_GRIDS:
             self.draw_grid(frame)
 
-        for site in self.sites:
-            self.scale_site(frame, *site.center)
+        self.draw_voronoi(frame)
 
         if self.sweep_line is not None:
             draw.rect(frame, RED, self.sweep_line)
 
-        self.draw_voronoi(frame)
-
-        if self.largest_circle:
-            self.draw_largest_circle(frame)
-
         if self.help:
-            self.draw_tutorial_box(frame, self.render_texts(TUTORIAL))
+            self.tutorial_box = self.draw_help(
+                frame,
+                self.render_texts(TUTORIAL)
+            )
 
         return frame
+
+    def draw_delaunay(self, frame: Surface) -> None:
+        if self.voronoi is None:
+            return
+
+        for edge in self.voronoi.delaunay:
+            self.scale_edge(frame, edge, GREEN)
 
     def draw_voronoi(self, frame: Surface) -> None:
         if self.voronoi is None:
@@ -424,15 +456,29 @@ class GUI:
 
         self.draw_edges(frame)
         self.draw_arcs(frame)
-        self.draw_event(frame)
+
+        if self.delaunay:
+            self.draw_delaunay(frame)
+
+        if self.largest_circle:
+            self.draw_largest_circle(frame)
+
+        if isinstance(self.voronoi.next_visible, CircleEvent):
+            self.draw_event(frame)
+
+        for site in self.sites:
+            self.scale_site(frame, *site.center)
+
+        if isinstance(self.voronoi.next_visible, SiteEvent):
+            self.draw_event(frame)
+
 
     def draw_edges(self, frame: Surface) -> None:
-
         if self.voronoi is None:
             return
 
         for edge in self.voronoi.edges:
-            self.scale_edge(frame, edge)
+            self.scale_edge(frame, edge, EDGE_COLOR)
 
     def draw_arcs(self, frame: Surface) -> None:
 
@@ -449,8 +495,8 @@ class GUI:
 
                 arc.update(d)
 
-                self.scale_edge(frame, arc.e1.bound())
-                self.scale_edge(frame, arc.e2.bound())
+                self.scale_edge(frame, arc.e1.bound(), EDGE_COLOR)
+                self.scale_edge(frame, arc.e2.bound(), EDGE_COLOR)
 
                 self.draw_arc(frame, arc, d)
 
@@ -458,8 +504,8 @@ class GUI:
 
     def draw_arc(self, frame: Surface, arc: Arc, d: D) -> None:
 
-        start: D = D(max(arc.e1.b.x, -WIDTH))
-        end: D = D(min(arc.e2.b.x, WIDTH))
+        start: D = D(max(arc.e1.b.x, -WIDTH * MIN_SCALE / self.scale))
+        end: D = D(min(arc.e2.b.x, WIDTH * MIN_SCALE / self.scale))
         increment: D = D(1 / self.scale)
 
         while start < end:
@@ -471,7 +517,7 @@ class GUI:
                 first: Point = Point(a, arc.f(a, d))
                 second: Point = Point(b, arc.f(b, d))
 
-                self.scale_edge(frame, Edge(first, second))
+                self.scale_edge(frame, Edge(first, second), EDGE_COLOR)
 
             start += increment
 

@@ -132,12 +132,12 @@ class AVLTree:
         if node is None:
             return None
 
-        node.update(y)
+        node.update(y + D(0.5))
 
         if node.left:
-            node.left.update(y)
+            node.left.update(y + D(0.5))
         if node.right:
-            node.right.update(y)
+            node.right.update(y + D(0.5))
 
         if arc < node:
             node.left = self.delete_arc(arc, node.left, y)

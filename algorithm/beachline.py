@@ -39,7 +39,7 @@ class BeachLine:
 
         return edges
 
-    def site(self, event: SiteEvent) -> list[CircleEvent]:
+    def site(self, event: SiteEvent) -> tuple[list[CircleEvent], set[Edge]]:
         events: list[CircleEvent] = []
 
         _, y = event.point
@@ -52,7 +52,7 @@ class BeachLine:
             self.list.insert(arc, self.list.head)
             self.tree.insert(arc)
 
-            return events
+            return events, set()
 
         a0: Arc | None = self.tree.search(Arc.dummy(event.point))
 
@@ -80,7 +80,7 @@ class BeachLine:
             a1.e2.finished = False
             a1.e1.finished = False
 
-            return events
+            return events, {Edge(a0.focus, a1.focus)}
 
         a1: Arc = Arc.dummy(event.point)
         a2: Arc = Arc.dummy(a0.focus)
@@ -118,14 +118,14 @@ class BeachLine:
         if ev := self.update_arc_event(a2, event.point):
             events.append(ev)
 
-        return events
+        return events, {Edge(a0.focus, a1.focus)}
 
-    def circle(self, event: CircleEvent) -> tuple[set[Edge], list[CircleEvent]]:
+    def circle(self, event: CircleEvent) -> tuple[set[Edge], list[CircleEvent], set[Edge]]:
         edges: set[Edge] = set()
         events: list[CircleEvent] = []
 
         if not event.arc.on_beachline:
-            return edges, events
+            return edges, events, set()
 
         assert event.arc.prev is not None
         assert event.arc.next is not None
@@ -155,7 +155,7 @@ class BeachLine:
         if ev := self.update_arc_event(a1, event.point):
             events.append(ev)
 
-        return edges, events
+        return edges, events, {Edge(a0.focus, a1.focus)}
 
     def update_arc_event(self, arc: Arc, point: Point) -> CircleEvent | None:
 
