@@ -6,6 +6,7 @@ from decimal import Decimal as D
 from geometry.arc import Arc
 from geometry.edge import Edge
 from geometry.point import Point
+from os import path
 
 class GUI:
     def __init__(self) -> None:
@@ -35,8 +36,8 @@ class GUI:
         init()
         font.init()
 
-        self.font = font.Font("fonts/FiraCode-Regular.ttf", FONT_SIZE)
-        self.font_bold = font.Font("fonts/FiraCode-Bold.ttf", FONT_SIZE)
+        self.font = font.Font(FONT_NAME, FONT_SIZE)
+        self.font_bold = font.Font(FONT_BOLD_NAME, FONT_SIZE)
         self.input_file()
 
         while self.running:
@@ -138,6 +139,9 @@ class GUI:
         return float(p.x), float(p.y)
 
     def input_file(self) -> None:
+        if not path.exists('points.txt'):
+            return
+
         with open('points.txt', 'r') as file:
             points = file.readlines()
 
@@ -546,4 +550,5 @@ if __name__ == '__main__':
         try:
             gui.run()
         except Exception as e:
+            print(e.with_traceback(None))
             gui.hard_reset()

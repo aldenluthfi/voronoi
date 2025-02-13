@@ -1,4 +1,9 @@
 from __future__ import annotations
+from os import path
+
+DIRNAME = path.dirname(__file__)
+FONT_NAME = path.join(DIRNAME, "fonts", "FiraCode-Regular.ttf")
+FONT_BOLD_NAME: str = path.join(DIRNAME, "fonts", "FiraCode-Bold.ttf")
 
 WHITE: tuple[int, int, int] = (255, 255, 255)
 BLACK: tuple[int, int, int] = (0, 0, 0)
