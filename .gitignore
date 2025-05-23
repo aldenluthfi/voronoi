@@ -1,8 +1,9 @@
 *
 !.gitignore
+!fonts/
 !geometry/
 !structures/
 !algorithm/
-!fonts/
+!*.ttf
 !*.py
 !points.txt
