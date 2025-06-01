@@ -1,1 +1,7 @@
-
+{
+    "avl-tree": "IconBinaryTree",
+    "data-structures": "IconDatabase",
+    "linked-list": "IconArrowsExchange",
+    "algorithms": "IconClockCode",
+    "voronoi": "IconSkewX"
+}
