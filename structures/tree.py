@@ -1,7 +1,10 @@
 from __future__ import annotations
 
-from decimal import Decimal as D
 from geometry.arc import Arc
+
+import numpy as np
+
+D = np.float64
 
 class AVLTree:
     def __init__(self):

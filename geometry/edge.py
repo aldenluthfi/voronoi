@@ -2,7 +2,10 @@ from __future__ import annotations
 from math import inf
 from constants import HEIGHT, WIDTH
 from geometry.point import Point
-from decimal import Decimal as D
+
+import numpy as np
+
+D = np.float64
 
 class Edge:
     def __init__(self, a: Point, b: Point, finished: bool = False) -> None:

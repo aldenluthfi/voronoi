@@ -2,11 +2,14 @@ from __future__ import annotations
 
 from algorithm.beachline import BeachLine
 from constants import HEIGHT, WIDTH
-from decimal import Decimal as D
 from algorithm.event import Event, SiteEvent, CircleEvent
 from geometry.point import Point
 from geometry.edge import Edge
 from queue import PriorityQueue
+
+import numpy as np
+
+D = np.float64
 
 class Voronoi:
     def __init__(self, sites: set[Point]) -> None:

@@ -2,11 +2,15 @@ from constants import *
 from pygame import *
 from algorithm.event import Event, SiteEvent, CircleEvent
 from algorithm.voronoi import Voronoi
-from decimal import Decimal as D
 from geometry.arc import Arc
 from geometry.edge import Edge
 from geometry.point import Point
 from os import path
+
+import asyncio
+import numpy as np
+
+D = np.float64
 
 class GUI:
     def __init__(self) -> None:
@@ -32,12 +36,17 @@ class GUI:
         self.font: font.Font | None = None
         self.font_bold: font.Font | None = None
 
-    def run(self) -> None:
+    async def run(self) -> None:
         init()
         font.init()
 
-        self.font = font.Font(FONT_NAME, FONT_SIZE)
-        self.font_bold = font.Font(FONT_BOLD_NAME, FONT_SIZE)
+        try:
+            self.font: font.Font | None = font.Font(FONT_NAME, FONT_SIZE)
+            self.font_bold: font.Font | None = font.Font(FONT_BOLD_NAME, FONT_SIZE)
+        except FileNotFoundError:
+            self.font: font.Font | None = font.Font(None, FONT_SIZE)
+            self.font_bold: font.Font | None = font.Font(None, FONT_SIZE)
+
         self.input_file()
 
         while self.running:
@@ -53,9 +62,9 @@ class GUI:
 
             self.screen.blit(frame, (0, 0))
             display.flip()
+            await asyncio.sleep(0)
 
         quit()
-
 
     def handle_event(self, frame: Surface, ev: event.Event) -> None:
         import pygame
@@ -476,7 +485,6 @@ class GUI:
         if isinstance(self.voronoi.next_visible, SiteEvent):
             self.draw_event(frame)
 
-
     def draw_edges(self, frame: Surface) -> None:
         if self.voronoi is None:
             return
@@ -486,25 +494,25 @@ class GUI:
 
     def draw_arcs(self, frame: Surface) -> None:
 
-            if self.voronoi is None or self.sweep_line is None:
-                return
+        if self.voronoi is None or self.sweep_line is None:
+            return
 
-            d: D | None = self.sweep_line_pos()
+        d: D | None = self.sweep_line_pos()
 
-            assert d is not None
+        assert d is not None
 
-            arc = self.voronoi.beachline.list.head
+        arc = self.voronoi.beachline.list.head
 
-            while arc is not None:
+        while arc is not None:
 
-                arc.update(d)
+            arc.update(d)
 
-                self.scale_edge(frame, arc.e1.bound(), EDGE_COLOR)
-                self.scale_edge(frame, arc.e2.bound(), EDGE_COLOR)
+            self.scale_edge(frame, arc.e1.bound(), EDGE_COLOR)
+            self.scale_edge(frame, arc.e2.bound(), EDGE_COLOR)
 
-                self.draw_arc(frame, arc, d)
+            self.draw_arc(frame, arc, d)
 
-                arc = arc.next
+            arc = arc.next
 
     def draw_arc(self, frame: Surface, arc: Arc, d: D) -> None:
 
@@ -527,13 +535,13 @@ class GUI:
 
     def draw_event(self, frame: Surface) -> None:
 
-            if self.voronoi is None:
-                return
+        if self.voronoi is None:
+            return
 
-            event: Event | None = self.voronoi.next_visible
+        event: Event | None = self.voronoi.next_visible
 
-            if event is not None:
-                self.scale_event(frame, event)
+        if event is not None:
+            self.scale_event(frame, event)
 
     def draw_largest_circle(self, frame: Surface) -> None:
         if self.voronoi is None:

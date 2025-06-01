@@ -1,7 +1,10 @@
 from __future__ import annotations
 from constants import EPSILON
-from decimal import Decimal as D
 from typing import Iterator
+
+import numpy as np
+
+D = np.float64
 
 class Point:
     def __init__(self, x: D | int | float, y: D | int | float) -> None:
@@ -24,7 +27,7 @@ class Point:
         return Point(self.x - other.x, self.y - other.y)
 
     def __abs__ (self) -> D:
-        return D.sqrt(self.x ** 2 + self.y ** 2)
+        return np.sqrt(self.x ** 2 + self.y ** 2)
 
     def __iter__(self) -> Iterator[D]:
         return iter([self.x, self.y])

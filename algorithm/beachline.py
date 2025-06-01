@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from constants import HEIGHT
-from decimal import Decimal as D
 from algorithm.event import SiteEvent, CircleEvent
 from geometry.edge import Edge
 from geometry.arc import Arc
@@ -9,6 +8,10 @@ from geometry.point import Point
 from math import inf
 from structures.tree import AVLTree
 from structures.list import DoublyLinkedList
+
+import numpy as np
+
+D = np.float64
 
 class BeachLine:
     def __init__(self) -> None:

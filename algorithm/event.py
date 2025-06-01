@@ -2,7 +2,10 @@ from __future__ import annotations
 
 from geometry.point import Point
 from geometry.arc import Arc
-from decimal import Decimal as D
+
+import numpy as np
+
+D = np.float64
 
 class Event:
     def __init__(self,point: Point) -> None:

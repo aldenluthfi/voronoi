@@ -1,7 +1,10 @@
 from __future__ import annotations
-from decimal import Decimal as D
 from geometry.edge import Edge
 from geometry.point import Point
+
+import numpy as np
+
+D = np.float64
 
 class Arc:
     def __init__(self, focus: Point, left: Edge, right: Edge) -> None:
@@ -94,7 +97,7 @@ class Arc:
         B = -a/(b-d) - p/(d-q)
         C = (a**2 / (2 * (b - d))) + ((b - q) / 2) + (p**2 / (2 * (d - q)))
 
-        x = (-B + D.sqrt(B**2 - 4 * A * C)) / (2 * A)
+        x = (-B + np.sqrt(B**2 - 4 * A * C)) / (2 * A)
         y = u.f(x, d)
 
         return Point(x, y)

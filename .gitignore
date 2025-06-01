@@ -4,6 +4,7 @@
 !geometry/
 !structures/
 !algorithm/
+!meta/
 !*.ttf
 !*.py
 !points.txt
