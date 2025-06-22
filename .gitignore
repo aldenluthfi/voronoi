@@ -1,10 +1,13 @@
 *
 !.gitignore
+!.github/
+!.github/meta/
 !fonts/
 !geometry/
 !structures/
 !algorithm/
-!meta/
 !*.ttf
 !*.py
+!*.json
+!*.png
 !points.txt

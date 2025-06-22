@@ -1,10 +1,3 @@
-# /// script
-# dependencies = [
-#  "numpy",
-#  "pygame-ce"
-# ]
-# ///
-
 from gui import GUI
 import asyncio
 
