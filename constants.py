@@ -5,10 +5,11 @@ DIRNAME = path.dirname(__file__)
 FONT_NAME = path.join(DIRNAME, "fonts", "FiraCode-Regular.ttf")
 FONT_BOLD_NAME: str = path.join(DIRNAME, "fonts", "FiraCode-Bold.ttf")
 
-WHITE: tuple[int, int, int] = (255, 255, 255)
-BLACK: tuple[int, int, int] = (0, 0, 0)
+BLACK: tuple[int, int, int] = (255, 255, 255)
+WHITE: tuple[int, int, int] = (0, 0, 0)
 RED: tuple[int, int, int] = (255, 0, 0)
 BLUE: tuple[int, int, int] = (0, 0, 255)
+PURPLE: tuple[int, int, int] = (128, 0, 128)
 GREEN: tuple[int, int, int] = (0, 255, 0)
 GRAY: tuple[int, int, int, int] = (240, 240, 240, 50)
 
@@ -26,7 +27,7 @@ MAX_Y: int = HEIGHT // 2
 EPSILON: float = 1e-6
 
 EVENT_COLOR: tuple[int, int, int] = BLUE
-CIRCLE_COLOR: tuple[int, int, int] = RED
+CIRCLE_COLOR: tuple[int, int, int] = PURPLE
 
 DEFAULT_SCALE: float = 1
 MIN_SCALE: float = 1/8
