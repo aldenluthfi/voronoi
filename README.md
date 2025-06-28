@@ -1,10 +1,10 @@
-# Interactive Voronoi Diagram Visualizer
-
 <picture>
   <source media="(prefers-color-scheme: light)" srcset="/.github/meta/dark.png">
   <source media="(prefers-color-scheme: dark)" srcset="/.github/meta/light.png">
   <img alt="Voronoi Diagram Visualizer">
 </picture>
+
+## 📖 About
 
 An interactive Python implementation of Voronoi diagrams using Fortune's sweep line algorithm. This educational tool provides real-time visualization of the algorithm's execution with support for interactive site manipulation, Delaunay triangulation display, and largest empty circle computation.
 
@@ -167,9 +167,17 @@ Run with verbose output:
 python -u main.py
 ```
 
-## 📜 License
+## ⚖️ License
 
-MIT License - see [LICENSE](LICENSE) for details.
+This repository is licensed under the [MIT License](License).
+
+With this license, you are allowed to:
+- Use, copy, modify, and distribute the software
+- Create derivative works and commercial applications
+- Include the software in larger projects
+- Redistribute under the same or different license terms
+
+However, please respect academic integrity if using this for educational purposes and do not submit the code as your own original work without proper attribution.
 
 ## 📚 References
 
