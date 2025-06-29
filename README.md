@@ -48,21 +48,71 @@ python main.py
 
 ## 🎮 Controls Reference
 
-| Key/Action | Function |
-|------------|----------|
-| **Left Click** | Add new site or select existing |
-| **Right Click** | Remove site |
-| **Drag Mouse** | Move selected site |
-| **W, A, S, D** | Pan diagram view |
-| **I / O** | Zoom in / out |
-| **K** | Start/pause sweep line animation |
-| **J / L** | Decrease/increase animation speed |
-| **M** | Toggle largest empty circle display |
-| **N** | Toggle Delaunay triangulation |
-| **E** | Redraw diagram |
-| **R** | Clear all sites |
-| **H** | Show/hide help |
-| **Q** | Quit application |
+| Key/Action      | Function                            |
+|-----------------|-------------------------------------|
+| **Left Click**  | Add new site or select existing     |
+| **Right Click** | Remove site                         |
+| **Drag Mouse**  | Move selected site                  |
+| **W, A, S, D**  | Pan diagram view                    |
+| **I / O**       | Zoom in / out                       |
+| **K**           | Start/pause sweep line animation    |
+| **J / L**       | Decrease/increase animation speed   |
+| **M**           | Toggle largest empty circle display |
+| **N**           | Toggle Delaunay triangulation       |
+| **E**           | Redraw diagram                      |
+| **R**           | Clear all sites                     |
+| **H**           | Show/hide help                      |
+| **Q**           | Quit application                    |
+
+### Running as an API (No GUI)
+You can run the application in API mode to process Voronoi diagrams interactively via commands.
+
+#### Protocol Mode
+
+Start protocol mode:
+```bash
+python main.py --no-gui
+```
+
+You will be prompted for commands. Each command is processed immediately or upon `RUN`. Type `EXIT` to quit.
+
+#### Supported Commands
+
+| Command                       | Description                                      |
+|-------------------------------|--------------------------------------------------|
+| `ADD (x, y)`                  | Add a site at coordinates (x, y)                 |
+| `REMOVE (x, y)`               | Remove a site at coordinates (x, y)              |
+| `PAN X <dx>`                  | Pan X by `<dx>` units                            |
+| `PAN Y <dy>`                  | Pan Y by `<dy>` units                            |
+| `ZOOM <factor>`               | Set zoom factor                                  |
+| `DELAUNAY ON` / `OFF`         | Enable/disable Delaunay triangulation output     |
+| `LEC ON` / `OFF`              | Enable/disable largest empty circle output       |
+| `EVENTS ON` / `OFF`           | Enable/disable next event output                 |
+| `SWEEPLINE ON` / `OFF`        | Enable/disable sweepline y-value output          |
+| `RUN`                         | Compute and print the current diagram            |
+| `CLEAR`                       | Remove all sites                                 |
+| `EXIT`                        | Quit protocol mode                               |
+
+#### Example Session
+
+```
+$ python main.py --no-gui
+Voronoi API protocol mode. Type commands (EXIT to quit).
+> ADD (100, 100)
+Added site (100.0, 100.0)
+> ADD (200, 150)
+Added site (200.0, 150.0)
+> DELAUNAY ON
+Delaunay output enabled
+> RUN
+Voronoi Edges:
+(100.0, 100.0) -> (200.0, 150.0)
+...
+Delaunay Triangulation Edges:
+(100.0, 100.0) -> (200.0, 150.0)
+...
+> EXIT
+```
 
 ## 📁 Project Structure
 
