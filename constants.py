@@ -7,11 +7,11 @@ FONT_BOLD_NAME: str = path.join(DIRNAME, "fonts", "FiraCode-Bold.ttf")
 
 WHITE: tuple[int, int, int] = (255, 255, 255)
 BLACK: tuple[int, int, int] = (0, 0, 0)
-RED: tuple[int, int, int] = (255, 0, 0)
-BLUE: tuple[int, int, int] = (0, 0, 255)
-PURPLE: tuple[int, int, int] = (128, 0, 128)
-GREEN: tuple[int, int, int] = (0, 255, 0)
-GRAY: tuple[int, int, int, int] = (240, 240, 240, 50)
+RED: tuple[int, int, int] = (239, 68, 68)
+BLUE: tuple[int, int, int] = (59, 130, 246)
+PURPLE: tuple[int, int, int] = (147, 51, 234)
+GREEN: tuple[int, int, int] = (34, 197, 94)
+GRAY: tuple[int, int, int, int] = (248, 250, 252, 50)
 
 GRID_THICKESS: int = 1
 MIN_GRIDS: int = 64
